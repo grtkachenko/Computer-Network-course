@@ -35,24 +35,7 @@ public class HistoryTable {
     }
 
     public synchronized void print() {
-        try {
-            Process process = Runtime.getRuntime().exec("clear");
-            InputStream is = process.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is);
-            BufferedReader br = new BufferedReader(isr);
-            String line;
-
-            while (true) {
-                line = br.readLine();
-                if (line == null) {
-                    break;
-                }
-                System.out.println(line);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        System.out.println("\033[H\033[2J");
         Collections.sort(clients);
         for (ClientInfo clientInfo : clients) {
             System.out.println(clientInfo);

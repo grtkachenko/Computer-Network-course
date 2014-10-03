@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * User: Grigory
@@ -52,18 +53,19 @@ public class ClientInfo implements Comparable<ClientInfo> {
 
     @Override
     public String toString() {
-        return ip + " " + mac + " " + deltaTime + " " + missedCount + " " + name ;
+        return String.format("%s %s %2d.%03d %d %s", ip, mac, TimeUnit.MILLISECONDS.toSeconds(deltaTime),
+                deltaTime % 1000, missedCount, name);
     }
 
     public void updateList(long currentTime) {
         List<Long> updatedList = new ArrayList<Long>();
         for (int i = 0; i < receiveTimes.size(); i++) {
-            if (currentTime - receiveTimes.get(i) <= Facade.MISS_THRESHOLD * (Facade.SEND_DELTA + 10)) {
+            if (currentTime - receiveTimes.get(i) <= Facade.MISS_THRESHOLD * (Facade.SEND_DELTA + 100)) {
                 updatedList.add(receiveTimes.get(i));
             }
         }
         receiveTimes = updatedList;
-        int targetCnt = Math.min(Facade.MISS_THRESHOLD, (int) ((currentTime - firstStartTime + 10) / Facade.SEND_DELTA) + 1);
+        int targetCnt = Math.min(Facade.MISS_THRESHOLD, (int) ((currentTime - firstStartTime - 100) / Facade.SEND_DELTA) + 1);
         missedCount = Math.max(0, targetCnt - receiveTimes.size());
         if (receiveTimes.size() == 0) {
             deltaTime = 0;

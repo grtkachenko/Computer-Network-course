@@ -26,7 +26,6 @@ public class SenderThread extends Thread {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
