@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.net.*;
+import java.util.Random;
 
 public class SenderThread extends Thread {
     public static final int META_DATA_SIZE = 10;
@@ -8,6 +9,9 @@ public class SenderThread extends Thread {
     protected DatagramSocket socket;
     private volatile boolean running = true;
     private final int sendPort;
+    private final Random random = new Random();
+    private final static boolean NEED_RAND = true;
+
 
     public SenderThread(DatagramSocket socket, int sendPort) throws SocketException {
         this.socket = socket;
@@ -17,6 +21,14 @@ public class SenderThread extends Thread {
     public void run() {
         while (running) {
             try {
+                if (NEED_RAND && random.nextBoolean()) {
+                    try {
+                        Thread.sleep(Facade.SEND_DELTA);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    continue;
+                }
                 byte[] buf = composeMessage();
                 InetAddress address = InetAddress.getByName("255.255.255.255");
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, address, sendPort);

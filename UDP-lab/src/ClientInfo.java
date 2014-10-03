@@ -58,14 +58,22 @@ public class ClientInfo implements Comparable<ClientInfo> {
     }
 
     public void updateList(long currentTime) {
+        if (!receiveTimes.isEmpty()) {
+            long cnt = (currentTime - receiveTimes.get(0)) / Facade.SEND_DELTA;
+            long exp = receiveTimes.get(0) + cnt * Facade.SEND_DELTA;
+            if (Math.abs(exp - currentTime) <= 100) {
+                return;
+            }
+        }
+
         List<Long> updatedList = new ArrayList<Long>();
         for (int i = 0; i < receiveTimes.size(); i++) {
-            if (currentTime - receiveTimes.get(i) <= Facade.MISS_THRESHOLD * (Facade.SEND_DELTA + 100)) {
+            if (currentTime - receiveTimes.get(i) <= Facade.MISS_THRESHOLD * (Facade.SEND_DELTA + 10)) {
                 updatedList.add(receiveTimes.get(i));
             }
         }
         receiveTimes = updatedList;
-        int targetCnt = Math.min(Facade.MISS_THRESHOLD, (int) ((currentTime - firstStartTime - 100) / Facade.SEND_DELTA) + 1);
+        int targetCnt = Math.min(Facade.MISS_THRESHOLD, (int) ((currentTime - firstStartTime) / (Facade.SEND_DELTA + 10)) + 1);
         missedCount = Math.max(0, targetCnt - receiveTimes.size());
         if (receiveTimes.size() == 0) {
             deltaTime = 0;
