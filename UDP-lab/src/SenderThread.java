@@ -4,13 +4,13 @@ import java.util.Random;
 
 public class SenderThread extends Thread {
     public static final int META_DATA_SIZE = 10;
-    private static final String USER_NAME = "grtkachenko";
+    private static final String USER_NAME = "Grigory Tkachenko";
 
     protected DatagramSocket socket;
     private volatile boolean running = true;
     private final int sendPort;
     private final Random random = new Random();
-    private final static boolean NEED_RAND = true;
+    private final static boolean NEED_RAND = false;
 
 
     public SenderThread(DatagramSocket socket, int sendPort) throws SocketException {

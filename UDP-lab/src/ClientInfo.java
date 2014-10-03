@@ -58,10 +58,12 @@ public class ClientInfo implements Comparable<ClientInfo> {
     }
 
     public void updateList(long currentTime) {
-        if (!receiveTimes.isEmpty()) {
-            long cnt = (currentTime - receiveTimes.get(0)) / Facade.SEND_DELTA;
-            long exp = receiveTimes.get(0) + cnt * Facade.SEND_DELTA;
-            if (Math.abs(exp - currentTime) <= 100) {
+        {
+            long checkPoint = receiveTimes.isEmpty() ? firstStartTime : receiveTimes.get(receiveTimes.size() - 1);
+            long cnt = (currentTime - checkPoint + 100) / Facade.SEND_DELTA;
+            long exp = checkPoint + cnt * Facade.SEND_DELTA;
+            if (Math.abs(exp - currentTime) <= 150) {
+                updateDeltaTime(currentTime);
                 return;
             }
         }
@@ -75,6 +77,10 @@ public class ClientInfo implements Comparable<ClientInfo> {
         receiveTimes = updatedList;
         int targetCnt = Math.min(Facade.MISS_THRESHOLD, (int) ((currentTime - firstStartTime) / (Facade.SEND_DELTA + 10)) + 1);
         missedCount = Math.max(0, targetCnt - receiveTimes.size());
+        updateDeltaTime(currentTime);
+    }
+
+    private void updateDeltaTime(long currentTime) {
         if (receiveTimes.size() == 0) {
             deltaTime = 0;
         } else {
