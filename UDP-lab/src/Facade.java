@@ -2,7 +2,11 @@
  * User: Grigory
  * Date: 27.09.2014
  */
-public class Utils {
+public class Facade {
+
+    public static final int PORT = 7777;
+    public static final int SEND_DELTA = 2000;
+    public static final int MISS_THRESHOLD = 10;
 
     public static String macAddrByteToString(byte[] mac) {
         StringBuilder sb = new StringBuilder();
@@ -26,14 +30,5 @@ public class Utils {
 
         return ipAddress;
     }
-
-//    public static byte[] MAC_ADDR_STRING_TO_BYTES(String str) {
-//        StringBuilder sb = new StringBuilder();
-//        for (int i = 0; i < mac.length; i++) {
-//            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
-//        }
-//        return sb.toString();
-//    }
-
 
 }

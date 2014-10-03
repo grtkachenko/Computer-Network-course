@@ -1,30 +1,28 @@
 import java.io.IOException;
 import java.net.*;
-import java.util.Arrays;
 
-public class ServerThread extends Thread {
+public class SenderThread extends Thread {
     public static final int META_DATA_SIZE = 10;
     private static final String USER_NAME = "grtkachenko";
 
     protected DatagramSocket socket;
     private volatile boolean running = true;
-    private final int listeningPort;
+    private final int sendPort;
 
-    public ServerThread(DatagramSocket socket, int listeningPort) throws SocketException {
+    public SenderThread(DatagramSocket socket, int sendPort) throws SocketException {
         this.socket = socket;
-        this.listeningPort = listeningPort;
+        this.sendPort = sendPort;
     }
 
     public void run() {
-
         while (running) {
             try {
                 byte[] buf = composeMessage();
                 InetAddress address = InetAddress.getByName("255.255.255.255");
-                DatagramPacket packet = new DatagramPacket(buf, buf.length, address, listeningPort);
+                DatagramPacket packet = new DatagramPacket(buf, buf.length, address, sendPort);
                 socket.send(packet);
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(Facade.SEND_DELTA);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -33,7 +31,6 @@ public class ServerThread extends Thread {
                 e.printStackTrace();
             }
         }
-        socket.close();
     }
 
     private byte[] composeMessage() throws UnknownHostException, SocketException {

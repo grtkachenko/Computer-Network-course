@@ -14,7 +14,6 @@ public class ClientInfo implements Comparable<ClientInfo> {
 
     private long deltaTime;
     private int missedCount;
-    private int sout;
 
     public ClientInfo(String name, String ip, String mac) {
         this.ip = ip;
@@ -28,11 +27,6 @@ public class ClientInfo implements Comparable<ClientInfo> {
     }
 
     public void addItem(long currentTime) {
-        if (receiveTimes.size() == 0) {
-            deltaTime = 0;
-        } else {
-            deltaTime = currentTime - receiveTimes.get(receiveTimes.size() - 1);
-        }
         receiveTimes.add(currentTime);
     }
 
@@ -64,16 +58,21 @@ public class ClientInfo implements Comparable<ClientInfo> {
     public void updateList(long currentTime) {
         List<Long> updatedList = new ArrayList<Long>();
         for (int i = 0; i < receiveTimes.size(); i++) {
-            if (currentTime - receiveTimes.get(i) <= 20000) {
+            if (currentTime - receiveTimes.get(i) <= Facade.MISS_THRESHOLD * (Facade.SEND_DELTA + 10)) {
                 updatedList.add(receiveTimes.get(i));
             }
         }
         receiveTimes = updatedList;
-        int targetCnt = Math.min(10, (int) ((currentTime - firstStartTime) / 2000));
+        int targetCnt = Math.min(Facade.MISS_THRESHOLD, (int) ((currentTime - firstStartTime + 10) / Facade.SEND_DELTA) + 1);
         missedCount = Math.max(0, targetCnt - receiveTimes.size());
+        if (receiveTimes.size() == 0) {
+            deltaTime = 0;
+        } else {
+            deltaTime = currentTime - receiveTimes.get(receiveTimes.size() - 1);
+        }
     }
 
     public int getMissedCount() {
-        return sout;
+        return missedCount;
     }
 }

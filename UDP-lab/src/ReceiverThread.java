@@ -2,12 +2,12 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-public class ClientThread extends Thread {
+public class ReceiverThread extends Thread {
     protected DatagramSocket socket;
     private boolean running = true;
     private HistoryTable table;
 
-    public ClientThread(DatagramSocket socket, HistoryTable table) {
+    public ReceiverThread(DatagramSocket socket, HistoryTable table) {
         this.socket = socket;
         this.table = table;
     }
@@ -21,7 +21,7 @@ public class ClientThread extends Thread {
                 socket.receive(packet);
                 byte[] ip = new byte[4];
                 byte[] mac = new byte[6];
-                byte[] name = new byte[packet.getData().length - ServerThread.META_DATA_SIZE];
+                byte[] name = new byte[packet.getData().length - SenderThread.META_DATA_SIZE];
                 for (int i = 0; i < 4; i++) {
                     ip[i] = packet.getData()[i];
                 }
@@ -36,16 +36,13 @@ public class ClientThread extends Thread {
                 }
 
                 String strName = new String(name);
-                String strIp = Utils.getIpAddress(ip);
-                String strMac = Utils.macAddrByteToString(mac);
+                String strIp = Facade.getIpAddress(ip);
+                String strMac = Facade.macAddrByteToString(mac);
                 table.receiveClientInfo(new ClientInfo(strName, strIp, strMac));
-                System.out.flush();
-//                System.out.println("Receiving message " +  strIp + " " + strMac + " " + strName);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        socket.close();
     }
 }
     
