@@ -1,9 +1,13 @@
 package utils;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * User: Grigory
@@ -39,6 +43,27 @@ public class Utils {
             stringBuilder.append(ip[i] + (i != 3 ? "." : ""));
         }
         return stringBuilder.toString();
+    }
+
+    public static String getNullTermString(InputStream inputStream) {
+        List<Byte> bytes = new ArrayList<Byte>();
+        while (true) {
+            int cur = 0;
+            try {
+                cur = inputStream.read();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (cur == 0) {
+                break;
+            }
+            bytes.add((byte) cur);
+        }
+        byte[] bytesArr = new byte[bytes.size()];
+        for (int j = 0; j < bytesArr.length; j++) {
+            bytesArr[j] = bytes.get(j);
+        }
+        return new String(bytesArr);
     }
 
 

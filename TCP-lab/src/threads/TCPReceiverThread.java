@@ -20,8 +20,7 @@ public class TCPReceiverThread extends Thread {
         while (running) {
             try {
                 Socket connectionSocket = socket.accept();
-                BufferedReader inFromClient;
-                inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
+                DataInputStream inFromClient = new DataInputStream(connectionSocket.getInputStream());
                 DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
                 int clientSentence = inFromClient.read();
                 switch (clientSentence) {
@@ -33,6 +32,17 @@ public class TCPReceiverThread extends Thread {
                             String name = file.getName();
                             outToClient.write(name.getBytes());
                             outToClient.write(0);
+                        }
+                        break;
+                    case CommandQueueCallback.CMD_ID_GET:
+                        outToClient.writeByte(CommandQueueCallback.CMD_ID_GET_RESPONSE);
+
+                        File targetFile = new File(Utils.getRoot().getAbsolutePath() + "/" + Utils.getNullTermString(inFromClient));
+                        outToClient.writeLong(targetFile.length());
+                        outToClient.write(DigestUtils.md5(new FileInputStream(targetFile)));
+                        FileInputStream fileInputStream = new FileInputStream(targetFile);
+                        for (int i = 0; i < targetFile.length(); i++) {
+                            outToClient.write(fileInputStream.read());
                         }
                         break;
 

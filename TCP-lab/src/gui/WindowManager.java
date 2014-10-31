@@ -44,7 +44,7 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
 
     @Override
     public void onCommandProcessed(Command command) {
-//        if (command.getCommandId() == CommandQueueCallback.CMD_ID_LIST_RESPONSE) {
+        if (command.getCommandId() == CommandQueueCallback.CMD_ID_LIST_RESPONSE) {
             try {
                 panel.updateServerFilesModel((List<String>) command.get());
             } catch (InterruptedException e) {
@@ -52,7 +52,7 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
             } catch (ExecutionException e) {
                 e.printStackTrace();
             }
-//        }
+        }
 
     }
 
@@ -159,20 +159,7 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
                                     for (int j = 0; j < 16; j++) {
                                         inFromServer.read();
                                     }
-
-                                    List<Byte> bytes = new ArrayList<Byte>();
-                                    while (true) {
-                                        int cur = inFromServer.read();
-                                        if (cur == 0) {
-                                            break;
-                                        }
-                                        bytes.add((byte) cur);
-                                    }
-                                    byte[] bytesArr = new byte[bytes.size()];
-                                    for (int j = 0; j < bytesArr.length; j++) {
-                                        bytesArr[j] = bytes.get(j);
-                                    }
-                                    res.add(new String(bytesArr));
+                                    res.add(Utils.getNullTermString(inFromServer));
                                 }
 
                                 clientSocket.close();
