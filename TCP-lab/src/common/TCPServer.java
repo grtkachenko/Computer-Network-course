@@ -12,7 +12,7 @@ import java.net.SocketException;
 
 public class TCPServer {
     public static final int UDP_PORT = 7777;
-    public static final int TCP_PORT = 6789;
+    public static final int TCP_PORT = UDP_PORT;
 
     public static void main(String[] args) throws Exception {
         try {
