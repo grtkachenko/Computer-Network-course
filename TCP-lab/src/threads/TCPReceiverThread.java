@@ -1,12 +1,12 @@
 package threads;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import command_queue.CommandQueueCallback;
+import org.apache.commons.codec.digest.DigestUtils;
+import utils.Utils;
+
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 
 public class TCPReceiverThread extends Thread {
     private static final String HOST_NAME = "grtkachenko";
@@ -23,12 +23,21 @@ public class TCPReceiverThread extends Thread {
         while (running) {
             try {
                 Socket connectionSocket = socket.accept();
-                BufferedReader inFromClient = null;
+                BufferedReader inFromClient;
                 inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
                 DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
-                String clientSentence = inFromClient.readLine();
-                System.out.println("Received: " + clientSentence);
-                outToClient.writeBytes("OK");
+                int clientSentence = inFromClient.read();
+                switch (clientSentence) {
+                    case CommandQueueCallback.CMD_ID_LIST:
+                        outToClient.writeByte(CommandQueueCallback.CMD_ID_LIST_RESPONSE);
+                        outToClient.writeInt(Utils.fileNumber());
+                        for (File file : Utils.getRoot().listFiles()) {
+                            outToClient.writeBytes(DigestUtils.md5Hex(new FileInputStream(file)));
+                            String name = file.getName() + '\000';
+                            outToClient.write(name.getBytes());
+                        }
+                        break;
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

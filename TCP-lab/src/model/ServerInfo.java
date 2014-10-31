@@ -39,4 +39,20 @@ public class ServerInfo implements Comparable<ServerInfo> {
     public int compareTo(ServerInfo serverInfo) {
         return serverName.compareTo(serverInfo.serverName);
     }
+
+    public String getServerName() {
+        return serverName;
+    }
+
+    public int getFilesCount() {
+        return filesCount;
+    }
+
+    public long getLastModificationTimestamp() {
+        return lastModificationTimestamp;
+    }
+
+    public String getIp() {
+        return Utils.bytesIpToString(ip);
+    }
 }
