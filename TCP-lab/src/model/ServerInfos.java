@@ -18,6 +18,9 @@ public class ServerInfos {
     private Set<ServerInfo> serverInfoList = new TreeSet<ServerInfo>();
 
     public void addServerInfoIfNeeded(ServerInfo serverInfo) {
+        if (serverInfoList.contains(serverInfo)) {
+            serverInfoList.remove(serverInfo);
+        }
         serverInfoList.add(serverInfo);
         for (ServerListChangeListener listener : listeners) {
             listener.onChanged(serverInfoList);

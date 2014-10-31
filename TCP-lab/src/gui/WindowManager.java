@@ -81,8 +81,31 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
 
 
         public void onChanged(Set<ServerInfo> serverInfoList) {
-            if (lastServerInfoList != null && lastServerInfoList.containsAll(serverInfoList) && serverInfoList.containsAll(lastServerInfoList)) {
-                return;
+            onChanged(serverInfoList, false);
+        }
+
+        private boolean containsAsString(ServerInfo serverInfo, Set<ServerInfo> list) {
+            for (ServerInfo cur : list) {
+                if (serverInfo.toString().equals(cur.toString())) {
+                    return true;
+                }
+            }
+            return false;
+
+        }
+
+        public void onChanged(Set<ServerInfo> serverInfoList, boolean force) {
+            if (!force && lastServerInfoList != null && lastServerInfoList.containsAll(serverInfoList) && serverInfoList.containsAll(lastServerInfoList)) {
+                boolean eq = serverInfoList.size() == lastServerInfoList.size();
+                for (ServerInfo serverInfo : lastServerInfoList) {
+                    if (!containsAsString(serverInfo, serverInfoList)) {
+                        eq = false;
+                        break;
+                    }
+                }
+                if (eq) {
+                    return;
+                }
             }
             lastServerInfoList.clear();
             serversModel.clear();
@@ -91,8 +114,6 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
                 serversModel.addElement(serverInfo.getServerName());
             }
             serverList.setModel(serversModel);
-            revalidate();
-            repaint();
         }
 
         private void updateMyFilesModel() {
@@ -101,8 +122,6 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
                 myFilesModel.addElement(file.getName());
             }
             myFileList.setModel(myFilesModel);
-            revalidate();
-            repaint();
         }
 
         public void updateServerFilesModel(List<String> serverFiles) {
@@ -112,8 +131,12 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
                 serverFilesModel.addElement(cur);
             }
             serverFileList.setModel(serverFilesModel);
-            revalidate();
-            repaint();
+        }
+
+        private void updateUi() {
+            updateMyFilesModel();
+            updateServerFilesModel(lastServerFilesList);
+            serverList.setModel(serversModel);
         }
 
         public MainPanel() {
@@ -222,9 +245,18 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
             });
 
             JButton putButton = new JButton("PUT");
+            JButton updButton = new JButton("**UPDATE_UI**");
+            updButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    updateUi();
+                }
+            });
             buttonsPanel.add(listButton);
             buttonsPanel.add(getButton);
             buttonsPanel.add(putButton);
+            buttonsPanel.add(updButton);
+
 
             add(pane);
             add(filesPanel);
