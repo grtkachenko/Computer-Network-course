@@ -9,9 +9,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class TCPReceiverThread extends Thread {
-    private static final String HOST_NAME = "grtkachenko";
-    private static final int META_DATA_SIZE = 16;
-
     private ServerSocket socket;
     private volatile boolean running = true;
 
@@ -32,11 +29,13 @@ public class TCPReceiverThread extends Thread {
                         outToClient.writeByte(CommandQueueCallback.CMD_ID_LIST_RESPONSE);
                         outToClient.writeInt(Utils.fileNumber());
                         for (File file : Utils.getRoot().listFiles()) {
-                            outToClient.writeBytes(DigestUtils.md5Hex(new FileInputStream(file)));
-                            String name = file.getName() + '\000';
+                            outToClient.write(DigestUtils.md5(new FileInputStream(file)));
+                            String name = file.getName();
                             outToClient.write(name.getBytes());
+                            outToClient.write(0);
                         }
                         break;
+
                 }
             } catch (IOException e) {
                 e.printStackTrace();

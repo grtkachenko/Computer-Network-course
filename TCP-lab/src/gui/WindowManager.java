@@ -1,9 +1,6 @@
 package gui;
 
-import command_queue.Command;
-import command_queue.CommandQueue;
-import command_queue.CommandQueueCallback;
-import command_queue.ListCommand;
+import command_queue.*;
 import common.TCPServer;
 import model.ServerInfo;
 import model.ServerInfos;
@@ -186,6 +183,43 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
                 }
             });
             JButton getButton = new JButton("GET");
+            getButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    if (!serverList.isSelectionEmpty() && !serverFileList.isSelectionEmpty()) {
+                        final String targetFile = lastServerFilesList.get(serverFileList.getSelectedIndex());
+                        final ServerInfo serverInfo = lastServerInfoList.get(serverList.getSelectedIndex());
+
+                        CommandQueue.getInstance().execute(new GetCommand(new Callable<File>() {
+                            @Override
+                            public File call() throws Exception {
+                                Socket clientSocket = new Socket(serverInfo.getIp(), TCPServer.TCP_PORT);
+                                DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+                                DataInputStream inFromServer = new DataInputStream(clientSocket.getInputStream());
+                                outToServer.writeByte(CommandQueueCallback.CMD_ID_GET);
+                                outToServer.write(targetFile.getBytes());
+                                outToServer.write(0);
+
+                                int type = inFromServer.read();
+                                long size = inFromServer.readLong();
+                                for (int i = 0; i < 16; i++) {
+                                    inFromServer.read();
+                                }
+                                FileOutputStream fileOuputStream = new FileOutputStream(Utils.getRoot().getAbsolutePath() + "/" + targetFile);
+                                byte[] bytes = new byte[(int) size];
+                                for (int i = 0; i < size; i++) {
+                                    bytes[i] = (byte) inFromServer.read();
+                                }
+                                fileOuputStream.write(bytes);
+                                fileOuputStream.close();
+                                clientSocket.close();
+                                return new File(Utils.getRoot().getAbsolutePath() + "/" + targetFile);
+                            }
+                        }));
+                    }
+                }
+            });
+
             JButton putButton = new JButton("PUT");
             buttonsPanel.add(listButton);
             buttonsPanel.add(getButton);
