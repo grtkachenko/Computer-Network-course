@@ -47,6 +47,7 @@ public class TCPReceiverThread extends Thread {
                         break;
 
                 }
+                connectionSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -123,6 +123,9 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
             serverList.addListSelectionListener(new ListSelectionListener() {
                 @Override
                 public void valueChanged(ListSelectionEvent listSelectionEvent) {
+                    if (serverList.isSelectionEmpty()) {
+                        return;
+                    }
                     serverInfoField.setText(lastServerInfoList.get(serverList.getSelectedIndex()).toString());
                 }
             });
