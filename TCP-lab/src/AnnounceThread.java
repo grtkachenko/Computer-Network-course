@@ -49,7 +49,7 @@ public class AnnounceThread extends Thread {
             msg[i] = Ints.toByteArray(Utils.fileNumber())[i - 4];
         }
         for (int i = 8; i < 16; i++) {
-            msg[i] = Longs.toByteArray(System.currentTimeMillis())[i - 8];
+            msg[i] = Longs.toByteArray(Utils.getLastModificationTimestamp())[i - 8];
         }
         System.arraycopy(nameMsg, 0, msg, 16, msg.length - 1 - 16);
         return msg;

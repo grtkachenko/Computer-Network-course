@@ -42,7 +42,7 @@ public class AnnounceReceiverThread extends Thread {
                 int fileCount = Ints.fromByteArray(fileCountArray);
                 long timeStamp = Longs.fromByteArray(timestampArray);
                 String name = new String(tmpName);
-                System.out.println(fileCount + " " + timeStamp + " " + name);
+                System.out.println(fileCount + " " + Utils.convertLongTimeToString(timeStamp) + " " + name);
                 System.out.flush();
             } catch (IOException e) {
                 e.printStackTrace();
