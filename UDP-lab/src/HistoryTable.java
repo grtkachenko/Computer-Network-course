@@ -1,3 +1,4 @@
+import java.io.*;
 import java.util.*;
 
 /**
@@ -7,7 +8,7 @@ import java.util.*;
 public class HistoryTable {
     public List<ClientInfo> clients = new ArrayList<ClientInfo>();
 
-    public void receiveClientInfo(ClientInfo info) {
+    public synchronized void receiveClientInfo(ClientInfo info) {
         long receiveTime = System.currentTimeMillis();
 
         if (clients.contains(info)) {
@@ -21,7 +22,7 @@ public class HistoryTable {
     }
 
 
-    public void updateState() {
+    public synchronized void updateState() {
         long currentTime = System.currentTimeMillis();
         List<ClientInfo> updatedList = new ArrayList<ClientInfo>();
         for (ClientInfo clientInfo : clients) {
@@ -33,10 +34,12 @@ public class HistoryTable {
         clients = updatedList;
     }
 
-    public void print() {
+    public synchronized void print() {
+        System.out.println("\033[H\033[2J");
         Collections.sort(clients);
         for (ClientInfo clientInfo : clients) {
             System.out.println(clientInfo);
         }
+
     }
 }

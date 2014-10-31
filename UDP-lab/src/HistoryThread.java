@@ -19,7 +19,7 @@ public class HistoryThread extends Thread {
             table.updateState();
             table.print();
             try {
-                Thread.sleep(2000);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

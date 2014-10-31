@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * User: Grigory
@@ -14,7 +15,6 @@ public class ClientInfo implements Comparable<ClientInfo> {
 
     private long deltaTime;
     private int missedCount;
-    private int sout;
 
     public ClientInfo(String name, String ip, String mac) {
         this.ip = ip;
@@ -28,11 +28,6 @@ public class ClientInfo implements Comparable<ClientInfo> {
     }
 
     public void addItem(long currentTime) {
-        if (receiveTimes.size() == 0) {
-            deltaTime = 0;
-        } else {
-            deltaTime = currentTime - receiveTimes.get(receiveTimes.size() - 1);
-        }
         receiveTimes.add(currentTime);
     }
 
@@ -58,22 +53,42 @@ public class ClientInfo implements Comparable<ClientInfo> {
 
     @Override
     public String toString() {
-        return ip + " " + mac + " " + deltaTime + " " + missedCount + " " + name ;
+        return String.format("%s %s %2d.%03d %d %s", ip, mac, TimeUnit.MILLISECONDS.toSeconds(deltaTime),
+                deltaTime % 1000, missedCount, name);
     }
 
     public void updateList(long currentTime) {
+        {
+            long checkPoint = receiveTimes.isEmpty() ? firstStartTime : receiveTimes.get(receiveTimes.size() - 1);
+            long cnt = (currentTime - checkPoint + 100) / Facade.SEND_DELTA;
+            long exp = checkPoint + cnt * Facade.SEND_DELTA;
+            if (Math.abs(exp - currentTime) <= 150) {
+                updateDeltaTime(currentTime);
+                return;
+            }
+        }
+
         List<Long> updatedList = new ArrayList<Long>();
         for (int i = 0; i < receiveTimes.size(); i++) {
-            if (currentTime - receiveTimes.get(i) <= 20000) {
+            if (currentTime - receiveTimes.get(i) <= Facade.MISS_THRESHOLD * (Facade.SEND_DELTA + 10)) {
                 updatedList.add(receiveTimes.get(i));
             }
         }
         receiveTimes = updatedList;
-        int targetCnt = Math.min(10, (int) ((currentTime - firstStartTime) / 2000));
+        int targetCnt = Math.min(Facade.MISS_THRESHOLD, (int) ((currentTime - firstStartTime) / (Facade.SEND_DELTA + 10)) + 1);
         missedCount = Math.max(0, targetCnt - receiveTimes.size());
+        updateDeltaTime(currentTime);
+    }
+
+    private void updateDeltaTime(long currentTime) {
+        if (receiveTimes.size() == 0) {
+            deltaTime = 0;
+        } else {
+            deltaTime = currentTime - receiveTimes.get(receiveTimes.size() - 1);
+        }
     }
 
     public int getMissedCount() {
-        return sout;
+        return missedCount;
     }
 }
