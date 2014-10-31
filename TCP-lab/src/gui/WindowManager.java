@@ -44,7 +44,7 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
 
     @Override
     public void onCommandProcessed(Command command) {
-        if (command.getCommandId() == CommandQueueCallback.CMD_ID_LIST_RESPONSE) {
+        if (command.getCommandId() == CommandQueueCallback.CMD_ID_LIST) {
             try {
                 panel.updateServerFilesModel((List<String>) command.get());
             } catch (InterruptedException e) {
