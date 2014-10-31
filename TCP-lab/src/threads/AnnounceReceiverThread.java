@@ -1,5 +1,10 @@
+package threads;
+
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
+import model.ServerInfo;
+import model.ServerInfos;
+import utils.Utils;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -9,10 +14,12 @@ import java.util.List;
 
 public class AnnounceReceiverThread extends Thread {
     protected DatagramSocket socket;
+    private ServerInfos serverInfos;
     private boolean running = true;
 
-    public AnnounceReceiverThread(DatagramSocket socket) {
+    public AnnounceReceiverThread(DatagramSocket socket, ServerInfos serverInfos) {
         this.socket = socket;
+        this.serverInfos = serverInfos;
     }
 
     public void run() {
@@ -42,7 +49,9 @@ public class AnnounceReceiverThread extends Thread {
                 int fileCount = Ints.fromByteArray(fileCountArray);
                 long timeStamp = Longs.fromByteArray(timestampArray);
                 String name = new String(tmpName);
-                System.out.println(fileCount + " " + Utils.convertLongTimeToString(timeStamp) + " " + name);
+                ServerInfo serverInfo = new ServerInfo(ipArray, name, fileCount, timeStamp);
+                serverInfos.addServerInfoIfNeeded(serverInfo);
+                System.out.println(serverInfo);
                 System.out.flush();
             } catch (IOException e) {
                 e.printStackTrace();

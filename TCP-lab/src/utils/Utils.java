@@ -1,3 +1,5 @@
+package utils;
+
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -28,7 +30,16 @@ public class Utils {
     public static String convertLongTimeToString(long time) {
         Date date = new Date(time);
         DateFormat formatter = new SimpleDateFormat("HH:mm:ss");
-        String dateFormatted = formatter.format(date);
-        return dateFormatted;
+        return formatter.format(date);
     }
+
+    public static String bytesIpToString(byte[] ip) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < 4; i++) {
+            stringBuilder.append(ip[i] + (i != 3 ? "." : ""));
+        }
+        return stringBuilder.toString();
+    }
+
+
 }
