@@ -14,9 +14,14 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.net.Socket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
@@ -25,9 +30,10 @@ import java.util.concurrent.ExecutionException;
  */
 public class WindowManager implements ServerInfos.ServerListChangeListener, CommandQueueCallback {
     private MainPanel panel;
+    private JFrame frame;
 
     public void initGui() {
-        JFrame frame = new JFrame("List Model Example");
+        frame = new JFrame("List Model Example");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         panel = new MainPanel();
         frame.setContentPane(panel);
@@ -85,6 +91,8 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
                 serversModel.addElement(serverInfo.getServerName());
             }
             serverList.setModel(serversModel);
+            revalidate();
+            repaint();
         }
 
         private void updateMyFilesModel() {
@@ -93,6 +101,8 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
                 myFilesModel.addElement(file.getName());
             }
             myFileList.setModel(myFilesModel);
+            revalidate();
+            repaint();
         }
 
         public void updateServerFilesModel(List<String> serverFiles) {
@@ -102,7 +112,8 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
                 serverFilesModel.addElement(cur);
             }
             serverFileList.setModel(serverFilesModel);
-
+            revalidate();
+            repaint();
         }
 
         public MainPanel() {
