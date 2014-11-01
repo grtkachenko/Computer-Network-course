@@ -45,6 +45,18 @@ public class TCPReceiverThread extends Thread {
                             outToClient.write(fileInputStream.read());
                         }
                         break;
+                    case CommandQueueCallback.CMD_ID_PUT:
+                        int type = inFromClient.read();
+                        String name = Utils.getNullTermString(inFromClient);
+                        long size = inFromClient.readLong();
+                        FileOutputStream fileOuputStream = new FileOutputStream(Utils.getRoot().getAbsolutePath() + "/" + name);
+                        byte[] bytes = new byte[(int) size];
+                        for (int i = 0; i < size; i++) {
+                            bytes[i] = (byte) inFromClient.read();
+                        }
+                        fileOuputStream.write(bytes);
+                        fileOuputStream.close();
+                        break;
 
                 }
                 connectionSocket.close();

@@ -4,6 +4,7 @@ import command_queue.*;
 import common.TCPServer;
 import model.ServerInfo;
 import model.ServerInfos;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.monitor.FileAlterationListener;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
@@ -14,10 +15,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,11 +78,11 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
         private DefaultListModel serversModel;
 
 
-        public void onChanged(Set<ServerInfo> serverInfoList) {
+        public synchronized void onChanged(Set<ServerInfo> serverInfoList) {
             onChanged(serverInfoList, false);
         }
 
-        private boolean containsAsString(ServerInfo serverInfo, Set<ServerInfo> list) {
+        private synchronized boolean containsAsString(ServerInfo serverInfo, Set<ServerInfo> list) {
             for (ServerInfo cur : list) {
                 if (serverInfo.toString().equals(cur.toString())) {
                     return true;
@@ -94,7 +92,7 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
 
         }
 
-        public void onChanged(Set<ServerInfo> serverInfoList, boolean force) {
+        public synchronized void onChanged(Set<ServerInfo> serverInfoList, boolean force) {
             if (!force && lastServerInfoList != null && lastServerInfoList.containsAll(serverInfoList) && serverInfoList.containsAll(lastServerInfoList)) {
                 boolean eq = serverInfoList.size() == lastServerInfoList.size();
                 for (ServerInfo serverInfo : lastServerInfoList) {
@@ -116,7 +114,7 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
             serverList.setModel(serversModel);
         }
 
-        private void updateMyFilesModel() {
+        private synchronized void updateMyFilesModel() {
             myFilesModel.clear();
             for (File file : Utils.getRoot().listFiles()) {
                 myFilesModel.addElement(file.getName());
@@ -124,7 +122,7 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
             myFileList.setModel(myFilesModel);
         }
 
-        public void updateServerFilesModel(List<String> serverFiles) {
+        public synchronized void updateServerFilesModel(List<String> serverFiles) {
             lastServerFilesList = new ArrayList<String>(serverFiles);
             serverFilesModel.clear();
             for (String cur : lastServerFilesList) {
@@ -133,10 +131,11 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
             serverFileList.setModel(serverFilesModel);
         }
 
-        private void updateUi() {
+        private synchronized  void updateUi() {
             updateMyFilesModel();
             updateServerFilesModel(lastServerFilesList);
-            serverList.setModel(serversModel);
+            repaint();
+            revalidate();
         }
 
         public MainPanel() {
@@ -245,6 +244,33 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
             });
 
             JButton putButton = new JButton("PUT");
+            putButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    if (!serverList.isSelectionEmpty() && !myFileList.isSelectionEmpty()) {
+                        final File targetFile = Utils.getRoot().listFiles()[serverList.getSelectedIndex()];
+                        final ServerInfo serverInfo = lastServerInfoList.get(serverList.getSelectedIndex());
+
+                        CommandQueue.getInstance().execute(new PutCommand(new Callable<Void>() {
+                            @Override
+                            public Void call() throws Exception {
+                                Socket clientSocket = new Socket(serverInfo.getIp(), TCPServer.TCP_PORT);
+                                DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+                                outToServer.writeByte(CommandQueueCallback.CMD_ID_PUT);
+                                outToServer.write(targetFile.getName().getBytes());
+                                outToServer.write(0);
+
+                                outToServer.writeLong(targetFile.length());
+                                FileInputStream fileInputStream = new FileInputStream(targetFile);
+                                for (int i = 0; i < targetFile.length(); i++) {
+                                    outToServer.write(fileInputStream.read());
+                                }
+                                return null;
+                            }
+                        }));
+                    }
+                }
+            });
             JButton updButton = new JButton("**UPDATE_UI**");
             updButton.addActionListener(new ActionListener() {
                 @Override
