@@ -248,7 +248,7 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
                     if (!serverList.isSelectionEmpty() && !myFileList.isSelectionEmpty()) {
-                        final File targetFile = Utils.getRoot().listFiles()[serverList.getSelectedIndex()];
+                        final File targetFile = Utils.getRoot().listFiles()[myFileList.getSelectedIndex()];
                         final ServerInfo serverInfo = lastServerInfoList.get(serverList.getSelectedIndex());
 
                         CommandQueue.getInstance().execute(new PutCommand(new Callable<Void>() {
