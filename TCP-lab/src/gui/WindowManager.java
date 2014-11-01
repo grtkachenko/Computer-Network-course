@@ -228,7 +228,7 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
                                 for (int i = 0; i < 16; i++) {
                                     inFromServer.read();
                                 }
-                                FileOutputStream fileOuputStream = new FileOutputStream(Utils.getRoot().getAbsolutePath() + "/" + targetFile);
+                                FileOutputStream fileOuputStream = new FileOutputStream(Utils.getRoot().getAbsolutePath() +File.separator + targetFile);
                                 byte[] bytes = new byte[(int) size];
                                 for (int i = 0; i < size; i++) {
                                     bytes[i] = (byte) inFromServer.read();
@@ -236,7 +236,7 @@ public class WindowManager implements ServerInfos.ServerListChangeListener, Comm
                                 fileOuputStream.write(bytes);
                                 fileOuputStream.close();
                                 clientSocket.close();
-                                return new File(Utils.getRoot().getAbsolutePath() + "/" + targetFile);
+                                return new File(Utils.getRoot().getAbsolutePath() + File.separator+ targetFile);
                             }
                         }));
                     }

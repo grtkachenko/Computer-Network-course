@@ -37,7 +37,7 @@ public class TCPReceiverThread extends Thread {
                     case CommandQueueCallback.CMD_ID_GET:
                         outToClient.writeByte(CommandQueueCallback.CMD_ID_GET_RESPONSE);
 
-                        File targetFile = new File(Utils.getRoot().getAbsolutePath() + "/" + Utils.getNullTermString(inFromClient));
+                        File targetFile = new File(Utils.getRoot().getAbsolutePath() + File.separator + Utils.getNullTermString(inFromClient));
                         outToClient.writeLong(targetFile.length());
                         outToClient.write(DigestUtils.md5(new FileInputStream(targetFile)));
                         FileInputStream fileInputStream = new FileInputStream(targetFile);
@@ -49,7 +49,7 @@ public class TCPReceiverThread extends Thread {
                         int type = inFromClient.read();
                         String name = Utils.getNullTermString(inFromClient);
                         long size = inFromClient.readLong();
-                        FileOutputStream fileOuputStream = new FileOutputStream(Utils.getRoot().getAbsolutePath() + "/" + name);
+                        FileOutputStream fileOuputStream = new FileOutputStream(Utils.getRoot().getAbsolutePath() + File.separator + name);
                         byte[] bytes = new byte[(int) size];
                         for (int i = 0; i < size; i++) {
                             bytes[i] = (byte) inFromClient.read();
