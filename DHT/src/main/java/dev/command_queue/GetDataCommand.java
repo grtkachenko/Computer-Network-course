@@ -6,6 +6,7 @@ import dev.utils.Utils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -13,25 +14,29 @@ import java.net.Socket;
  * User: gtkachenko
  * Date: 27/03/15
  */
-public class GetPredecessorCommand extends Command<InetAddress> {
-    private InetAddress to;
+public class GetDataCommand extends Command<File> {
+    private InetAddress address;
+    private int key;
 
-    public GetPredecessorCommand(InetAddress to) {
-        this.to = to;
+    public GetDataCommand(InetAddress address, int key) {
+        this.address = address;
+        this.key = key;
     }
 
     @Override
-    public InetAddress call() throws Exception {
+    public File call() throws Exception {
         Log.log(getTag(), "call");
-        Socket socket = new Socket(to, Main.TCP_PORT);
+        Socket socket = new Socket(address, Main.TCP_PORT);
         DataInputStream in = new DataInputStream(socket.getInputStream());
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-        out.writeByte(CommandQueue.GET_PREDECESSOR);
-        InetAddress result = null;
+        out.writeByte(CommandQueue.GET_DATA);
+        out.writeInt(key);
+        File result = null;
         if (in.readByte() == 0) {
             byte[] ip = {in.readByte(), in.readByte(), in.readByte(), in.readByte()};
-            Log.log(getTag(), "ok result from " + Utils.ipToString(ip));
-            result = InetAddress.getByAddress(ip);
+            // TODO: read file!!!
+            Log.log(getTag(), "NOT READ YET, BUT ok result from " + Utils.ipToString(ip));
+            result = new File("test.txt");
         } else {
             Log.log(getTag(), "error");
         }

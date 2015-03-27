@@ -4,6 +4,7 @@ import dev.threads.CancelableThread;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,6 +22,7 @@ public class NetworkManager {
     private InetAddress predecessor;
     private CancelableThread initSenderThread;
     private InetAddress[] finger = new InetAddress[40];
+    private HashMap<Integer, InetAddress> backUp = new HashMap<Integer, InetAddress>();
 
     private NetworkManager() {
     }
@@ -52,5 +54,17 @@ public class NetworkManager {
 
     public InetAddress[] getFinger() {
         return finger;
+    }
+
+    public InetAddress getSuccessor() {
+        return null;
+    }
+
+    public InetAddress getSuccessor2() {
+        return null;
+    }
+
+    public HashMap<Integer, InetAddress> getBackUp() {
+        return backUp;
     }
 }

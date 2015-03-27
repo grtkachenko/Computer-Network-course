@@ -1,6 +1,7 @@
 package dev.command_queue;
 
 import dev.Main;
+import dev.utils.Log;
 import dev.utils.NetworkManager;
 
 import java.io.DataOutputStream;
@@ -20,6 +21,7 @@ public class NotifyCommand extends Command<Void> {
 
     @Override
     public Void call() throws Exception {
+        Log.log(getTag(), "call");
         Socket socket = new Socket(to, Main.TCP_PORT);
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
         out.writeByte(CommandQueue.NOTIFY);

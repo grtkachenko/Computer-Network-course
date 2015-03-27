@@ -38,6 +38,16 @@ public class Utils {
         return null;
     }
 
+    public static InetAddress inetAddresFromInt(int value) {
+        byte[] bytes = ByteBuffer.allocate(4).putInt(value).array();
+        try {
+            return InetAddress.getByAddress(bytes);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static byte[] sha1(byte[] bytes) {
         try {
             MessageDigest md;
