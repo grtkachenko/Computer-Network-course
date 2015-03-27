@@ -1,11 +1,9 @@
 package dev.command_queue;
 
-import dev.Main;
-import dev.utils.Log;
-
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
 
 /**
  * User: gtkachenko
@@ -21,13 +19,14 @@ public class DeleteEntryCommand extends Command<Void> {
     }
 
     @Override
-    public Void call() throws Exception {
-        Log.log(getTag(), "call");
-        Socket socket = new Socket(address, Main.TCP_PORT);
-        DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+    protected InetAddress getAddress() {
+        return address;
+    }
+
+    @Override
+    protected Void run(DataInputStream in, DataOutputStream out) throws IOException {
         out.writeByte(CommandQueue.DELETE_ENTRY);
         out.writeInt(key);
-        socket.close();
         return null;
     }
 }

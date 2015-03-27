@@ -4,7 +4,6 @@ import dev.command_queue.CommandQueue;
 import dev.command_queue.FindSuccessorCommand;
 import dev.command_queue.GetPredecessorCommand;
 import dev.command_queue.NotifyCommand;
-import dev.utils.Log;
 import dev.utils.NetworkManager;
 import dev.utils.Utils;
 

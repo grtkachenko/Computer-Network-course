@@ -1,12 +1,11 @@
 package dev.command_queue;
 
-import dev.Main;
 import dev.utils.Log;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
 
 /**
  * User: gtkachenko
@@ -24,20 +23,19 @@ public class AddEntryCommand extends Command<Boolean> {
     }
 
     @Override
-    public Boolean call() throws Exception {
-        Log.log(getTag(), "call");
-        Socket socket = new Socket(address, Main.TCP_PORT);
-        DataInputStream in = new DataInputStream(socket.getInputStream());
-        DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+    protected InetAddress getAddress() {
+        return address;
+    }
+
+    @Override
+    protected Boolean run(DataInputStream in, DataOutputStream out) throws IOException {
         out.writeByte(CommandQueue.ADD_ENTRY);
         out.writeInt(key);
         out.write(value.getAddress());
-        boolean result = false;
         switch (in.read()) {
             case 0x0:
                 Log.log(getTag(), "ok");
-                result = true;
-                break;
+                return true;
             case 0xfe:
                 Log.log(getTag(), "collision");
                 break;
@@ -46,7 +44,6 @@ public class AddEntryCommand extends Command<Boolean> {
                 break;
 
         }
-        socket.close();
-        return result;
+        return false;
     }
 }

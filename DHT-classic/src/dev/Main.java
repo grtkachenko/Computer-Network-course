@@ -7,11 +7,10 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 
 public class Main {
-    public static final int TCP_PORT = 7777;
+    public static final int TCP_PORT = 8888;
 
     public static void main(String[] args) throws Exception {
         try {
-            System.out.println("Hello");
             DatagramSocket socket = new DatagramSocket(TCP_PORT);
 
             new TCPReceiverThread(TCP_PORT).start();

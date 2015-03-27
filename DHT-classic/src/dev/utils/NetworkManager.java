@@ -22,6 +22,7 @@ public class NetworkManager {
     private static HashMap<Integer, InetAddress> hashTable = new HashMap<Integer, InetAddress>();
 
     public static int[] start;
+
     static {
         start = new int[MAX_FINGER];
         start[0] = Utils.sha1(getMyInetAddres());

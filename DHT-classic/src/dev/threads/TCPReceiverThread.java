@@ -39,9 +39,7 @@ public class TCPReceiverThread extends CancelableThread {
                         try {
                             switch (clientSentence) {
                                 case CommandQueue.PICK_UP:
-                                    Log.log(getTag(), "received PICK_UP");
                                     if (!NetworkManager.getInitSenderThread().running) {
-                                        Log.log(getTag(), "ALREADY INIT");
                                         break;
                                     }
                                     NetworkManager.getInitSenderThread().cancel();
@@ -49,14 +47,14 @@ public class TCPReceiverThread extends CancelableThread {
                                     for (int i = 0; i < 4; i++) {
                                         ip[i] = inFromClient.readByte();
                                     }
+                                    Log.log(getTag(), "received PICK_UP from " + Utils.ipToString(ip));
                                     joinAfterPickup(InetAddress.getByAddress(ip));
                                     break;
 
                                 case CommandQueue.FIND_SUCCESSOR:
-                                    Log.log(getTag(), "received FIND_SUCCESSOR");
                                     int id = inFromClient.readInt();
+                                    Log.log(getTag(), "received FIND_SUCCESSOR; id = " + id);
                                     InetAddress successor = findSuccessor(id);
-                                    System.out.println("111222 " + successor);
                                     if (successor == null) {
                                         outToClient.writeByte(0xff);
                                     } else {
@@ -67,17 +65,16 @@ public class TCPReceiverThread extends CancelableThread {
 
                                 case CommandQueue.GET_PREDECESSOR:
                                     Log.log(getTag(), "received GET_PREDECESSOR");
-                                    System.out.println("111222 responded " + NetworkManager.getPredecessor());
                                     outToClient.writeByte(0);
                                     outToClient.write(NetworkManager.getPredecessor().getAddress());
                                     break;
 
                                 case CommandQueue.NOTIFY:
-                                    Log.log(getTag(), "received NOTIFY");
                                     ip = new byte[4];
                                     for (int i = 0; i < 4; i++) {
                                         ip[i] = inFromClient.readByte();
                                     }
+                                    Log.log(getTag(), "received NOTIFY from " + Utils.ipToString(ip));
                                     TCPReceiverThread.this.notify(InetAddress.getByAddress(ip));
                                     break;
 
@@ -107,8 +104,8 @@ public class TCPReceiverThread extends CancelableThread {
         if (Utils.inetAddressInsideInEx(sha1(byAddress), sha1(NetworkManager.getPredecessor()), sha1(NetworkManager.getMyInetAddres()))) {
             InetAddress oldPred = NetworkManager.getPredecessor();
             NetworkManager.setPredecessor(byAddress);
-//            shareTable(oldPred);
-//            cleanTable(oldPred);
+            shareTable(oldPred);
+            cleanTable(oldPred);
         }
     }
 
@@ -163,9 +160,6 @@ public class TCPReceiverThread extends CancelableThread {
             }
         }
 
-//        if (NetworkManager.getFinger()[0].equals(NetworkManager.getMyInetAddres())) {
-//            return null;
-//        }
         return NetworkManager.getFinger()[0];
     }
 

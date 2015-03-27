@@ -30,6 +30,7 @@ public class CommandQueue {
     }
 
     private ExecutorService executorService = Executors.newFixedThreadPool(10);
+
     private CommandQueue() {
     }
 

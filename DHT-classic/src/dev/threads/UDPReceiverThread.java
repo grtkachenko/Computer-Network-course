@@ -2,6 +2,7 @@ package dev.threads;
 
 import dev.command_queue.CommandQueue;
 import dev.command_queue.PickUpCommand;
+import dev.utils.Log;
 import dev.utils.NetworkManager;
 import dev.utils.Utils;
 
@@ -29,27 +30,23 @@ public class UDPReceiverThread extends CancelableThread {
                     case CommandQueue.INIT:
                         byte[] ip = new byte[4];
                         System.arraycopy(buf, 1, ip, 0, 4);
-                        System.out.println("Receive init from " + Utils.ipToString(ip));
-                        System.out.println("SHA1 : " + Utils.sha1(InetAddress.getByAddress(ip)));
-
                         InetAddress from = InetAddress.getByAddress(ip);
                         InetAddress left = NetworkManager.getMyInetAddres();
                         InetAddress right = NetworkManager.getSuccessor();
-                        System.out.println("111222 from left right " + Utils.sha1(from) + " " + Utils.sha1(left) + " " + Utils.sha1(right));
                         if (from.equals(right)) {
                             continue;
                         }
 
                         if (left == null || Utils.inetAddressInside(from, left, right)) {
-                            System.out.println("Send pickup");
+                            Log.log(getTag(), "sending PICK_UP");
                             CommandQueue.getInstance().execute(new PickUpCommand(from));
                             NetworkManager.getInitSenderThread().cancel();
                         }
                         break;
                     case CommandQueue.KEEP_ALIVE:
+                        // TODO: write it
                         break;
                 }
-                System.out.println(buf[0]);
             } catch (IOException e) {
                 e.printStackTrace();
             }

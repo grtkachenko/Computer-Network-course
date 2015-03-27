@@ -1,14 +1,13 @@
 package dev.command_queue;
 
-import dev.Main;
 import dev.utils.Log;
 import dev.utils.NetworkManager;
 import dev.utils.Utils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
 
 /**
  * User: gtkachenko
@@ -24,13 +23,13 @@ public class GetBackupCommand extends Command<Boolean> {
     }
 
     @Override
-    public Boolean call() throws Exception {
-        Log.log(getTag(), "call");
-        Socket socket = new Socket(address, Main.TCP_PORT);
-        DataInputStream in = new DataInputStream(socket.getInputStream());
-        DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+    protected InetAddress getAddress() {
+        return address;
+    }
+
+    @Override
+    protected Boolean run(DataInputStream in, DataOutputStream out) throws IOException {
         out.writeByte(CommandQueue.GET_BACKUP);
-        boolean result = false;
         if (in.read() == 0) {
             Log.log(getTag(), "ok result");
             int dataLen = in.readInt();
@@ -39,11 +38,10 @@ public class GetBackupCommand extends Command<Boolean> {
                 int value = in.readInt();
                 NetworkManager.getBackUp().put(key, Utils.inetAddresFromInt(value));
             }
-            result = true;
+            return true;
         } else {
             Log.log(getTag(), "error");
+            return false;
         }
-        socket.close();
-        return result;
     }
 }
