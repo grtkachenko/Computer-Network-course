@@ -5,12 +5,16 @@ package dev.utils;
  * Date: 27/03/15
  */
 public class Log {
-    private static final boolean DEBUG = true;
+    public static boolean DEBUG = true;
 
     public static void log(String tag, String msg) {
-        if (DEBUG) {
+        if (DEBUG && !tag.contains("command_queue")) {
             System.out.println(tag + ": " + msg);
         }
+    }
+
+    public static void log(String msg) {
+        log("", msg);
     }
 
 }

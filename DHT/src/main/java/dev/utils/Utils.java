@@ -66,8 +66,43 @@ public class Utils {
     }
 
     public static boolean inetAddressInside(InetAddress address, InetAddress left, InetAddress right) {
-        // TODO : rewrite it
-        return sha1(left) <= sha1(address) && sha1(address) <= sha1(right);
+        return inetAddressInsideExIn(sha1(address), sha1(left), sha1(right));
+    }
+
+    public static boolean inetAddressInside(int address, InetAddress left, InetAddress right) {
+        return inetAddressInsideExIn(address, sha1(left), sha1(right));
+    }
+
+    public static boolean inetAddressInside(InetAddress address, InetAddress left, int right) {
+        return inetAddressInsideExIn(sha1(address), sha1(left), right);
+    }
+
+    public static boolean inetAddressInsideExIn(int id, int l, int r) {
+        if (l < r) {
+            return l < id && id <= r;
+        }
+        return l < id || id <= r;
+    }
+
+    public static boolean inetAddressInsideExEx(int id, int l, int r) {
+        if (l < r) {
+            return l < id && id < r;
+        }
+        return l < id || id < r;
+    }
+
+    public static boolean inetAddressInsideInEx(int id, int l, int r) {
+        if (l < r) {
+            return l <= id && id < r;
+        }
+        return l <= id || id < r;
+    }
+
+    public static boolean inetAddressInsideInIn(int id, int l, int r) {
+        if (l < r) {
+            return l <= id && id <= r;
+        }
+        return l <= id || id <= r;
     }
 
     public static int sha1(InetAddress addr) {

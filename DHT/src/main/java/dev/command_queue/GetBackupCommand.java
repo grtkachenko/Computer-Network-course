@@ -7,7 +7,6 @@ import dev.utils.Utils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -32,13 +31,13 @@ public class GetBackupCommand extends Command<Boolean> {
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
         out.writeByte(CommandQueue.GET_BACKUP);
         boolean result = false;
-        if (in.readByte() == 0) {
+        if (in.read() == 0) {
             Log.log(getTag(), "ok result");
             int dataLen = in.readInt();
             for (int i = 0; i < dataLen / 8; i++) {
                 int key = in.readInt();
                 int value = in.readInt();
-                NetworkManager.getInstance().getBackUp().put(key, Utils.inetAddresFromInt(value));
+                NetworkManager.getBackUp().put(key, Utils.inetAddresFromInt(value));
             }
             result = true;
         } else {

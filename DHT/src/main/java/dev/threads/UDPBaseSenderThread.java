@@ -1,6 +1,7 @@
 package dev.threads;
 
 import dev.Main;
+import dev.utils.Log;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -21,7 +22,7 @@ public abstract class UDPBaseSenderThread extends CancelableThread {
         while (running) {
             try {
                 if (getAddress() != null) {
-                    System.out.println("Send " + getClass());
+                    Log.log(getTag());
                     byte[] buf = composeMessage();
                     DatagramPacket packet = new DatagramPacket(buf, buf.length, getAddress(), Main.TCP_PORT);
                     socket.send(packet);

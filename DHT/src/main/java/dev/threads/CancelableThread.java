@@ -12,4 +12,12 @@ public class CancelableThread extends Thread {
         running = false;
     }
 
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    protected String getTag() {
+        return this.getClass().getName();
+    }
 }

@@ -13,21 +13,32 @@ import java.util.HashMap;
  * Time: 00:56
  */
 public class NetworkManager {
-    private static NetworkManager ourInstance = new NetworkManager();
+    public static final int MAX_FINGER = 32;
+    private static InetAddress predecessor;
+    private static InetAddress successor2;
+    private static CancelableThread initSenderThread;
+    private static InetAddress[] finger = new InetAddress[MAX_FINGER];
+    private static HashMap<Integer, InetAddress> backUp = new HashMap<Integer, InetAddress>();
+    private static HashMap<Integer, InetAddress> hashTable = new HashMap<Integer, InetAddress>();
 
-    public static NetworkManager getInstance() {
-        return ourInstance;
+    public static int[] start;
+    static {
+        start = new int[MAX_FINGER];
+        start[0] = Utils.sha1(getMyInetAddres());
+        int curDeg = 1;
+        for (int i = 0; i < start.length; i++) {
+            start[i] = Utils.sha1(getMyInetAddres()) + curDeg - 1;
+            curDeg *= 2;
+        }
+        finger[0] = getMyInetAddres();
+        predecessor = getMyInetAddres();
+        successor2 = getMyInetAddres();
     }
-
-    private InetAddress predecessor;
-    private CancelableThread initSenderThread;
-    private InetAddress[] finger = new InetAddress[40];
-    private HashMap<Integer, InetAddress> backUp = new HashMap<Integer, InetAddress>();
 
     private NetworkManager() {
     }
 
-    public InetAddress getPredecessor() {
+    public static InetAddress getPredecessor() {
         return predecessor;
     }
 
@@ -40,31 +51,39 @@ public class NetworkManager {
         return null;
     }
 
-    public CancelableThread getInitSenderThread() {
+    public static CancelableThread getInitSenderThread() {
         return initSenderThread;
     }
 
-    public void setInitSenderThread(CancelableThread initSenderThread) {
-        this.initSenderThread = initSenderThread;
+    public static void setInitSenderThread(CancelableThread initSenderThread) {
+        NetworkManager.initSenderThread = initSenderThread;
     }
 
-    public void setPredecessor(InetAddress predecessor) {
-        this.predecessor = predecessor;
+    public static void setPredecessor(InetAddress predecessor) {
+        NetworkManager.predecessor = predecessor;
     }
 
-    public InetAddress[] getFinger() {
+    public static InetAddress[] getFinger() {
         return finger;
     }
 
-    public InetAddress getSuccessor() {
-        return null;
+    public static InetAddress getSuccessor() {
+        return finger[0];
     }
 
-    public InetAddress getSuccessor2() {
-        return null;
+    public static InetAddress getSuccessor2() {
+        return successor2;
     }
 
-    public HashMap<Integer, InetAddress> getBackUp() {
+    public static void setSuccessor2(InetAddress successor2) {
+        NetworkManager.successor2 = successor2;
+    }
+
+    public static HashMap<Integer, InetAddress> getBackUp() {
         return backUp;
+    }
+
+    public static HashMap<Integer, InetAddress> getHashTable() {
+        return hashTable;
     }
 }

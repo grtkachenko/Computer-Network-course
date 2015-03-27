@@ -1,6 +1,7 @@
 package dev.threads;
 
 import dev.command_queue.CommandQueue;
+import dev.utils.NetworkManager;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -18,7 +19,10 @@ public class KeepaAliveSenderThread extends UDPBaseSenderThread {
 
     @Override
     protected InetAddress getAddress() {
-        return inetAddress;
+        if (!NetworkManager.getPredecessor().equals(NetworkManager.getMyInetAddres())) {
+            return NetworkManager.getPredecessor();
+        }
+        return null;
     }
 
     public void setInetAddress(InetAddress inetAddress) {

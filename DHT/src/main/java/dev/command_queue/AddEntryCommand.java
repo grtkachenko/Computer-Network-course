@@ -2,7 +2,6 @@ package dev.command_queue;
 
 import dev.Main;
 import dev.utils.Log;
-import dev.utils.NetworkManager;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -34,7 +33,7 @@ public class AddEntryCommand extends Command<Boolean> {
         out.writeInt(key);
         out.write(value.getAddress());
         boolean result = false;
-        switch (in.readChar()) {
+        switch (in.read()) {
             case 0x0:
                 Log.log(getTag(), "ok");
                 result = true;

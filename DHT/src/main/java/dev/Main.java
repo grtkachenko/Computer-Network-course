@@ -16,12 +16,12 @@ public class Main {
 
             new TCPReceiverThread(TCP_PORT).start();
             CancelableThread initSenderThread = new InitSenderThread(socket, 2000);
-            NetworkManager.getInstance().setInitSenderThread(initSenderThread);
+            NetworkManager.setInitSenderThread(initSenderThread);
             initSenderThread.start();
             new KeepaAliveSenderThread(socket, 2000).start();
             new UDPReceiverThread(socket).start();
-
-
+            new StabilizeThread(2000).start();
+            new FixFingersThread(2000).start();
         } catch (SocketException e) {
             e.printStackTrace();
         }

@@ -28,7 +28,7 @@ public class GetPredecessorCommand extends Command<InetAddress> {
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
         out.writeByte(CommandQueue.GET_PREDECESSOR);
         InetAddress result = null;
-        if (in.readByte() == 0) {
+        if (in.read() == 0) {
             byte[] ip = {in.readByte(), in.readByte(), in.readByte(), in.readByte()};
             Log.log(getTag(), "ok result from " + Utils.ipToString(ip));
             result = InetAddress.getByAddress(ip);

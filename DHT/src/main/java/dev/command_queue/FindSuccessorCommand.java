@@ -31,7 +31,7 @@ public class FindSuccessorCommand extends Command<InetAddress> {
         out.writeByte(CommandQueue.FIND_SUCCESSOR);
         out.writeInt(id);
         InetAddress result = null;
-        if (in.readByte() == 0) {
+        if (in.read() == 0) {
             byte[] ip = {in.readByte(), in.readByte(), in.readByte(), in.readByte()};
             Log.log(getTag(), "ok result from " + Utils.ipToString(ip));
             result = InetAddress.getByAddress(ip);

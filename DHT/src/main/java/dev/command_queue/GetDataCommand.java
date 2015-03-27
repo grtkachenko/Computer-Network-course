@@ -32,7 +32,7 @@ public class GetDataCommand extends Command<File> {
         out.writeByte(CommandQueue.GET_DATA);
         out.writeInt(key);
         File result = null;
-        if (in.readByte() == 0) {
+        if (in.read() == 0) {
             byte[] ip = {in.readByte(), in.readByte(), in.readByte(), in.readByte()};
             // TODO: read file!!!
             Log.log(getTag(), "NOT READ YET, BUT ok result from " + Utils.ipToString(ip));

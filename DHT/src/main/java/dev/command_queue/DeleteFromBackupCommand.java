@@ -6,7 +6,6 @@ import dev.utils.NetworkManager;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
 
 /**
@@ -23,13 +22,13 @@ public class DeleteFromBackupCommand extends Command<Boolean> {
     @Override
     public Boolean call() throws Exception {
         Log.log(getTag(), "call");
-        Socket socket = new Socket(NetworkManager.getInstance().getFinger()[0], Main.TCP_PORT);
+        Socket socket = new Socket(NetworkManager.getFinger()[0], Main.TCP_PORT);
         DataInputStream in = new DataInputStream(socket.getInputStream());
-g        DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+        DataOutputStream out = new DataOutputStream(socket.getOutputStream());
         out.writeByte(CommandQueue.DELETE_FROM_BACKUP);
         out.writeInt(key);
         boolean result = false;
-        if (in.readByte() == 0) {
+        if (in.read() == 0) {
             Log.log(getTag(), "ok result");
             result = true;
         } else {

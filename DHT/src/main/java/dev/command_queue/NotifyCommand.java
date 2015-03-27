@@ -25,7 +25,7 @@ public class NotifyCommand extends Command<Void> {
         Socket socket = new Socket(to, Main.TCP_PORT);
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
         out.writeByte(CommandQueue.NOTIFY);
-        out.write(NetworkManager.getInstance().getMyInetAddres().getAddress());
+        out.write(NetworkManager.getMyInetAddres().getAddress());
         socket.close();
         return null;
     }

@@ -33,14 +33,17 @@ public class UDPReceiverThread extends CancelableThread {
                         System.out.println("SHA1 : " + Utils.sha1(InetAddress.getByAddress(ip)));
 
                         InetAddress from = InetAddress.getByAddress(ip);
-                        InetAddress left = NetworkManager.getInstance().getPredecessor();
-                        InetAddress right = NetworkManager.getInstance().getMyInetAddres();
+                        InetAddress left = NetworkManager.getMyInetAddres();
+                        InetAddress right = NetworkManager.getSuccessor();
+                        System.out.println("111222 from left right " + Utils.sha1(from) + " " + Utils.sha1(left) + " " + Utils.sha1(right));
                         if (from.equals(right)) {
                             continue;
                         }
 
                         if (left == null || Utils.inetAddressInside(from, left, right)) {
+                            System.out.println("Send pickup");
                             CommandQueue.getInstance().execute(new PickUpCommand(from));
+                            NetworkManager.getInitSenderThread().cancel();
                         }
                         break;
                     case CommandQueue.KEEP_ALIVE:

@@ -4,7 +4,6 @@ import dev.Main;
 import dev.utils.NetworkManager;
 
 import java.io.DataOutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
 
 /**
@@ -17,7 +16,7 @@ public class PredFailedCommand extends Command<Void> {
 
     @Override
     public Void call() throws Exception {
-        Socket socket = new Socket(NetworkManager.getInstance().getSuccessor2(), Main.TCP_PORT);
+        Socket socket = new Socket(NetworkManager.getSuccessor2(), Main.TCP_PORT);
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
         out.writeByte(CommandQueue.PRED_FAILED);
         out.write(NetworkManager.getMyInetAddres().getAddress());
