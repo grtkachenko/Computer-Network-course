@@ -24,7 +24,14 @@ public class Main {
         } catch (SocketException e) {
             e.printStackTrace();
         }
+    }
 
+    public static void addEntry(int key, String value) {
+        TCPReceiverHandler.addEntry(key, value);
+    }
+
+    public static String getEntry(int key) {
+        return TCPReceiverHandler.getEntry(key);
     }
 
 }

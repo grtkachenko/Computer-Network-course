@@ -65,6 +65,18 @@ public class Utils {
         return new byte[0];
     }
 
+    public static byte[] sha1(int value) {
+        return sha1(byteArrayFromInt(value));
+    }
+
+    public static byte[] byteArrayFromInt(int value) {
+        return ByteBuffer.allocate(4).putInt(value).array();
+    }
+
+    public static int intFromByteArray(byte[] arr) {
+        return ByteBuffer.wrap(sha1(arr)).getInt();
+    }
+
     public static boolean inetAddressInside(InetAddress address, InetAddress left, InetAddress right) {
         return inetAddressInsideExIn(sha1(address), sha1(left), sha1(right));
     }
@@ -106,7 +118,7 @@ public class Utils {
     }
 
     public static int sha1(InetAddress addr) {
-        return ByteBuffer.wrap(sha1(addr.getAddress())).getInt();
+        return intFromByteArray(addr.getAddress());
     }
 
     public static int mySha1() {

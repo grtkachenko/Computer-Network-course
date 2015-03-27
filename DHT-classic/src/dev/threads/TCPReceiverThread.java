@@ -1,23 +1,8 @@
 package dev.threads;
 
-import dev.command_queue.AddEntryCommand;
-import dev.command_queue.CommandQueue;
-import dev.command_queue.DeleteFromBackupCommand;
-import dev.command_queue.FindSuccessorCommand;
-import dev.utils.Log;
-import dev.utils.NetworkManager;
-import dev.utils.Utils;
-
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
-import static dev.utils.Utils.sha1;
 
 public class TCPReceiverThread extends CancelableThread {
     private ServerSocket socket;

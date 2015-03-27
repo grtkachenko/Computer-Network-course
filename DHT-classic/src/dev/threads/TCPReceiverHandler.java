@@ -1,9 +1,6 @@
 package dev.threads;
 
-import dev.command_queue.AddEntryCommand;
-import dev.command_queue.CommandQueue;
-import dev.command_queue.DeleteFromBackupCommand;
-import dev.command_queue.FindSuccessorCommand;
+import dev.command_queue.*;
 import dev.utils.Log;
 import dev.utils.NetworkManager;
 import dev.utils.Utils;
@@ -23,7 +20,7 @@ import static dev.utils.Utils.sha1;
  * Date: 28/03/15
  */
 public class TCPReceiverHandler implements Runnable {
-    
+
     private final String tag;
     private final Socket connectionSocket;
 
@@ -49,7 +46,7 @@ public class TCPReceiverHandler implements Runnable {
                         ip[i] = inFromClient.readByte();
                     }
                     Log.log(tag, "received PICK_UP from " + Utils.ipToString(ip));
-                    joinAfterPickup(InetAddress.getByAddress(ip));
+                    join(InetAddress.getByAddress(ip));
                     break;
 
                 case CommandQueue.FIND_SUCCESSOR:
@@ -93,34 +90,34 @@ public class TCPReceiverHandler implements Runnable {
             InetAddress oldPred = NetworkManager.getPredecessor();
             NetworkManager.setPredecessor(byAddress);
             shareTable(oldPred);
-            cleanTable(oldPred);
+//            cleanTable(oldPred);
         }
     }
 
     private void shareTable(InetAddress oldPred) {
         for (Integer key : NetworkManager.getHashTable().keySet()) {
-            if (Utils.inetAddressInsideInEx(key, sha1(oldPred), sha1(NetworkManager.getPredecessor()))) {
+//            if (Utils.inetAddressInsideInEx(key, sha1(oldPred), sha1(NetworkManager.getPredecessor()))) {
                 CommandQueue.getInstance().execute(new AddEntryCommand(NetworkManager.getPredecessor(), key, NetworkManager.getHashTable().get(key)));
-            }
+//            }
         }
     }
 
     private void cleanTable(InetAddress oldPred) {
         for (Integer key : NetworkManager.getHashTable().keySet()) {
             if (Utils.inetAddressInsideInEx(key, sha1(oldPred), sha1(NetworkManager.getPredecessor()))) {
-                while (true) {
-                    Future<Boolean> res = CommandQueue.getInstance().execute(new DeleteFromBackupCommand(key));
-                    try {
-                        if (res.get()) {
-                            break;
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                }
-                NetworkManager.getHashTable().remove(key);
+//                while (true) {
+//                    Future<Boolean> res = CommandQueue.getInstance().execute(new DeleteFromBackupCommand(key));
+//                    try {
+//                        if (res.get()) {
+//                            break;
+//                        }
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    } catch (ExecutionException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+            NetworkManager.getHashTable().remove(key);
             }
         }
     }
@@ -151,7 +148,7 @@ public class TCPReceiverHandler implements Runnable {
         return NetworkManager.getFinger()[0];
     }
 
-    private void joinAfterPickup(InetAddress byAddress) {
+    private void join(InetAddress byAddress) {
         NetworkManager.getFinger()[0] = runFindSuccessor(byAddress, Utils.mySha1());
         InetAddress succ2 = runFindSuccessor(NetworkManager.getFinger()[0], Utils.sha1(NetworkManager.getFinger()[0]));
 
@@ -163,24 +160,50 @@ public class TCPReceiverHandler implements Runnable {
     }
 
     public static InetAddress runFindSuccessor(InetAddress address, int id) {
-        for (int i = 0; i < 1; i++) {
-            FindSuccessorCommand findSuccessorCommand = new FindSuccessorCommand(address, id);
-            Future<InetAddress> future = CommandQueue.getInstance().execute(findSuccessorCommand);
-            try {
-                if (future.get() != null) {
-                    return future.get();
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
+        FindSuccessorCommand findSuccessorCommand = new FindSuccessorCommand(address, id);
+        Future<InetAddress> future = CommandQueue.getInstance().execute(findSuccessorCommand);
+        try {
+            if (future.get() != null) {
+                return future.get();
             }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
         return null;
     }
+
+    public static void addEntry(int key, String value) {
+        int hash = Utils.intFromByteArray(sha1(key));
+        InetAddress inetAddress = findSuccessor(hash);
+        AddEntryCommand addEntryCommand = new AddEntryCommand(inetAddress, hash, NetworkManager.getMyInetAddres());
+        Future<Boolean> future = CommandQueue.getInstance().execute(addEntryCommand);
+        try {
+            if (future.get()) {
+                NetworkManager.getMyData().put(key, value);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String getEntry(int key) {
+        int hash = Utils.intFromByteArray(sha1(key));
+        InetAddress inetAddress = findSuccessor(hash);
+        GetIpCommand getIpCommand = new GetIpCommand(inetAddress, hash);
+        Future<InetAddress> future = CommandQueue.getInstance().execute(getIpCommand);
+        try {
+            InetAddress address = future.get();
+            return CommandQueue.getInstance().execute(new GetDataCommand(address, hash)).get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
