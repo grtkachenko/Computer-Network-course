@@ -7,7 +7,6 @@ import dev.utils.Utils;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -15,31 +14,27 @@ import java.net.Socket;
  * User: gtkachenko
  * Date: 27/03/15
  */
-public class GetBackupCommand extends Command<Boolean> {
-    private InetAddress address;
+public class AddToBackupCommand extends Command<Boolean> {
+    private InetAddress value;
     private int key;
 
-    public GetBackupCommand(InetAddress address, int key) {
-        this.address = address;
+    public AddToBackupCommand(InetAddress value, int key) {
+        this.value = value;
         this.key = key;
     }
 
     @Override
     public Boolean call() throws Exception {
         Log.log(getTag(), "call");
-        Socket socket = new Socket(address, Main.TCP_PORT);
+        Socket socket = new Socket(NetworkManager.getInstance().getFinger()[0], Main.TCP_PORT);
         DataInputStream in = new DataInputStream(socket.getInputStream());
         DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-        out.writeByte(CommandQueue.GET_BACKUP);
+        out.writeByte(CommandQueue.ADD_TO_BACKUP);
+        out.writeInt(key);
+        out.write(value.getAddress());
         boolean result = false;
         if (in.readByte() == 0) {
             Log.log(getTag(), "ok result");
-            int dataLen = in.readInt();
-            for (int i = 0; i < dataLen / 8; i++) {
-                int key = in.readInt();
-                int value = in.readInt();
-                NetworkManager.getInstance().getBackUp().put(key, Utils.inetAddresFromInt(value));
-            }
             result = true;
         } else {
             Log.log(getTag(), "error");
