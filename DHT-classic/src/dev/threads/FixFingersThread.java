@@ -21,7 +21,7 @@ public class FixFingersThread extends CancelableThread {
     public void run() {
         while (running) {
             int index = random.nextInt(NetworkManager.MAX_FINGER);
-            NetworkManager.getFinger()[index] = TCPReceiverThread.findSuccessor(NetworkManager.start[index]);
+            NetworkManager.getFinger()[index] = TCPReceiverHandler.findSuccessor(NetworkManager.start[index]);
             try {
                 Thread.sleep(delta);
             } catch (InterruptedException e) {
