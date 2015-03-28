@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import static dev.utils.Utils.intFromByteArray;
 import static dev.utils.Utils.sha1;
 
 /**
@@ -76,9 +77,41 @@ public class TCPReceiverHandler implements Runnable {
                     notify(InetAddress.getByAddress(ip));
                     break;
 
+                case CommandQueue.ADD_ENTRY:
+                    Log.log(tag, "received ADD_ENTRY");
+                    int key = inFromClient.readInt();
+                    ip = new byte[4];
+                    for (int i = 0; i < 4; i++) {
+                        ip[i] = inFromClient.readByte();
+                    }
+                    NetworkManager.getHashTable().put(key, InetAddress.getByAddress(ip));
+                    outToClient.writeByte(0);
+                    break;
+
+                case CommandQueue.DELETE_ENTRY:
+                    Log.log(tag, "received DELETE_ENTRY");
+                    key = inFromClient.readInt();
+                    NetworkManager.getHashTable().remove(key);
+                    break;
+
+                case CommandQueue.GET_IP:
+                    Log.log(tag, "received GET_IP");
+                    outToClient.writeByte(0);
+                    key = inFromClient.readInt();
+                    outToClient.write(NetworkManager.getHashTable().get(key).getAddress());
+                    break;
+
+                case CommandQueue.GET_DATA:
+                    Log.log(tag, "received GET_DATA");
+                    key = inFromClient.readInt();
+                    outToClient.write(NetworkManager.getMyData().get(key).getBytes());
+                    outToClient.write(0);
+                    break;
+
             }
             Log.log("NETWORK", String.format("pred = %s, me = %s, succ = %s, succ2 = %s", NetworkManager.getPredecessor(), NetworkManager.getMyInetAddres(),
                     NetworkManager.getSuccessor(), NetworkManager.getSuccessor2()));
+            Log.log("DATA", String.format("hashtable = %s, data = %s", NetworkManager.getHashTable().toString(), NetworkManager.getMyData().toString()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -95,14 +128,21 @@ public class TCPReceiverHandler implements Runnable {
     }
 
     private void shareTable(InetAddress oldPred) {
+        if (oldPred.equals(NetworkManager.getMyInetAddres())) {
+            return;
+        }
+
         for (Integer key : NetworkManager.getHashTable().keySet()) {
 //            if (Utils.inetAddressInsideInEx(key, sha1(oldPred), sha1(NetworkManager.getPredecessor()))) {
-                CommandQueue.getInstance().execute(new AddEntryCommand(NetworkManager.getPredecessor(), key, NetworkManager.getHashTable().get(key)));
+            CommandQueue.getInstance().execute(new AddEntryCommand(NetworkManager.getPredecessor(), key, NetworkManager.getHashTable().get(key)));
 //            }
         }
     }
 
     private void cleanTable(InetAddress oldPred) {
+        if (oldPred.equals(NetworkManager.getMyInetAddres())) {
+            return;
+        }
         for (Integer key : NetworkManager.getHashTable().keySet()) {
             if (Utils.inetAddressInsideInEx(key, sha1(oldPred), sha1(NetworkManager.getPredecessor()))) {
 //                while (true) {
@@ -117,7 +157,7 @@ public class TCPReceiverHandler implements Runnable {
 //                        e.printStackTrace();
 //                    }
 //                }
-            NetworkManager.getHashTable().remove(key);
+                NetworkManager.getHashTable().remove(key);
             }
         }
     }
@@ -174,14 +214,14 @@ public class TCPReceiverHandler implements Runnable {
         return null;
     }
 
-    public static void addEntry(int key, String value) {
+    public static void addEntry(String key, String value) {
         int hash = Utils.intFromByteArray(sha1(key));
         InetAddress inetAddress = findSuccessor(hash);
         AddEntryCommand addEntryCommand = new AddEntryCommand(inetAddress, hash, NetworkManager.getMyInetAddres());
         Future<Boolean> future = CommandQueue.getInstance().execute(addEntryCommand);
         try {
             if (future.get()) {
-                NetworkManager.getMyData().put(key, value);
+                NetworkManager.getMyData().put(intFromByteArray(sha1(key)), value);
             }
         } catch (InterruptedException e) {
             e.printStackTrace();

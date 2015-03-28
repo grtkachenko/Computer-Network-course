@@ -20,7 +20,7 @@ public class NetworkManager {
     private static InetAddress[] finger = new InetAddress[MAX_FINGER];
     private static HashMap<Integer, InetAddress> backUp = new HashMap<Integer, InetAddress>();
     private static HashMap<Integer, InetAddress> hashTable = new HashMap<Integer, InetAddress>();
-    private static HashMap<Integer, String> myData= new HashMap<Integer, String>();
+    private static HashMap<Integer, String> myData = new HashMap<Integer, String>();
 
     public static int[] start;
 

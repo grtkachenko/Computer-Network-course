@@ -125,7 +125,7 @@ public class Utils {
         return sha1(NetworkManager.getMyInetAddres());
     }
 
-    public byte[] sha1(String s) {
+    public static byte[] sha1(String s) {
         try {
             return sha1(s.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {

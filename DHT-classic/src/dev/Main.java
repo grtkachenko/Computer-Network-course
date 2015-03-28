@@ -1,13 +1,15 @@
 package dev;
 
 import dev.threads.*;
+import dev.utils.LogGUI;
 import dev.utils.NetworkManager;
 
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.Scanner;
 
 public class Main {
-    public static final int TCP_PORT = 7778;
+    public static final int TCP_PORT = 8889;
 
     public static void main(String[] args) throws Exception {
         try {
@@ -21,17 +23,10 @@ public class Main {
             new UDPReceiverThread(socket).start();
             new StabilizeThread(2000).start();
             new FixFingersThread(2000).start();
+            new LogGUI();
         } catch (SocketException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void addEntry(int key, String value) {
-        TCPReceiverHandler.addEntry(key, value);
-    }
-
-    public static String getEntry(int key) {
-        return TCPReceiverHandler.getEntry(key);
     }
 
 }
