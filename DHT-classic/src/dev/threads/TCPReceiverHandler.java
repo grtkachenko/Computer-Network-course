@@ -157,7 +157,7 @@ public class TCPReceiverHandler implements Runnable {
 //                        e.printStackTrace();
 //                    }
 //                }
-                NetworkManager.getHashTable().remove(key);
+//                NetworkManager.getHashTable().remove(key);
             }
         }
     }
