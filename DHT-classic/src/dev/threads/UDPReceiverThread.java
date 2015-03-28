@@ -21,21 +21,23 @@ public class UDPReceiverThread extends CancelableThread {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if (lastKeepAlive != -1) {
-                    long now = System.currentTimeMillis();
-                    if (now - lastKeepAlive > 8000) {
-                        successorFailed();
+                while (true) {
+                    if (lastKeepAlive != -1) {
+                        long now = System.currentTimeMillis();
+                        if (now - lastKeepAlive > 10000) {
+                            successorFailed();
+                        }
+                    }
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
 
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
             }
-        });
+        }).start();
     }
 
     public void run() {
@@ -63,7 +65,6 @@ public class UDPReceiverThread extends CancelableThread {
                         break;
                     case CommandQueue.KEEP_ALIVE:
                         Log.log(getTag(), "receiveg KEEP_ALIVE");
-
                         lastKeepAlive = System.currentTimeMillis();
                         break;
                 }
@@ -76,9 +77,9 @@ public class UDPReceiverThread extends CancelableThread {
 
     public static void successorFailed() {
         Log.log("sending PRED_FAILED");
-        CommandQueue.getInstance().execute(new PredFailedCommand());
+        lastKeepAlive = -1;
         NetworkManager.getFinger()[0] = NetworkManager.getSuccessor2();
         NetworkManager.setSuccessor2(TCPReceiverHandler.runFindSuccessor(NetworkManager.getFinger()[0], Utils.sha1(NetworkManager.getFinger()[0])));
-        lastKeepAlive = -1;
+        CommandQueue.getInstance().execute(new PredFailedCommand());
     }
 }

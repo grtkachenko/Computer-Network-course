@@ -133,6 +133,12 @@ public class TCPReceiverHandler implements Runnable {
                     NetworkManager.getBackUp().put(key, InetAddress.getByAddress(ip));
                     outToClient.writeByte(0);
                     break;
+
+                case CommandQueue.GET_BACKUP:
+                    Log.log(tag, "received GET_BACKUP");
+                    outToClient.writeByte(0);
+                    outToClient.writeInt(0);
+                    break;
             }
             Log.log("NETWORK", String.format("pred = %s, me = %s, succ = %s, succ2 = %s", NetworkManager.getPredecessor(), NetworkManager.getMyInetAddres(),
                     NetworkManager.getSuccessor(), NetworkManager.getSuccessor2()));
@@ -144,7 +150,7 @@ public class TCPReceiverHandler implements Runnable {
 
 
     private void notify(InetAddress byAddress) {
-        if (Utils.inetAddressInsideInEx(sha1(byAddress), sha1(NetworkManager.getPredecessor()), sha1(NetworkManager.getMyInetAddres()))) {
+        if (Utils.inetAddressInsideExEx(sha1(byAddress), sha1(NetworkManager.getPredecessor()), sha1(NetworkManager.getMyInetAddres()))) {
             InetAddress oldPred = NetworkManager.getPredecessor();
             NetworkManager.setPredecessor(byAddress);
             shareTable(oldPred);
@@ -192,23 +198,43 @@ public class TCPReceiverHandler implements Runnable {
             return NetworkManager.getMyInetAddres();
         }
 
-        for (int i = NetworkManager.MAX_FINGER - 1; i >= 0; i--) {
-            InetAddress finger = NetworkManager.getFinger()[i];
-            if (finger != null && Utils.inetAddressInsideExEx(sha1(finger), sha1(NetworkManager.getMyInetAddres()), id)) {
-                FindSuccessorCommand findSuccessorCommand = new FindSuccessorCommand(finger, id);
-                Future<InetAddress> future = CommandQueue.getInstance().execute(findSuccessorCommand);
-                try {
-                    InetAddress result = future.get();
-                    if (result != null) {
-                        return result;
-                    }
-                } catch (InterruptedException e) {
-                } catch (ExecutionException e) {
+        InetAddress finger = NetworkManager.getFinger()[0];
+        if (finger != null) {
+            FindSuccessorCommand findSuccessorCommand = new FindSuccessorCommand(finger, id);
+            Future<InetAddress> future = CommandQueue.getInstance().execute(findSuccessorCommand);
+
+            try {
+                InetAddress result = future.get();
+                System.out.println("111222 node : " + finger + "; id : " + id + "; result = " + result);
+                if (result != null) {
+                    return result;
                 }
+            } catch (InterruptedException e) {
+            } catch (ExecutionException e) {
             }
         }
+        return null;
 
-        return NetworkManager.getFinger()[0];
+
+//        for (int i = NetworkManager.MAX_FINGER - 1; i >= 0; i--) {
+//            InetAddress finger = NetworkManager.getFinger()[i];
+//            if (finger != null && Utils.inetAddressInsideExEx(sha1(finger), sha1(NetworkManager.getMyInetAddres()), id)) {
+//                FindSuccessorCommand findSuccessorCommand = new FindSuccessorCommand(finger, id);
+//                Future<InetAddress> future = CommandQueue.getInstance().execute(findSuccessorCommand);
+//
+//                try {
+//                    InetAddress result = future.get();
+//                    System.out.println("111222 node : " + finger + "; id : " + id + "; result = " + result);
+//                    if (result != null) {
+//                        return result;
+//                    }
+//                } catch (InterruptedException e) {
+//                } catch (ExecutionException e) {
+//                }
+//            }
+//        }
+//
+//        return NetworkManager.getFinger()[0];
     }
 
     private void join(InetAddress byAddress) {
@@ -239,6 +265,10 @@ public class TCPReceiverHandler implements Runnable {
 
     public static void addEntry(String key, String value) {
         int hash = Utils.intFromByteArray(sha1(key));
+        System.out.println("111222 " + hash);
+        System.out.println("111222 pred" + Utils.sha1(NetworkManager.getPredecessor()));
+        System.out.println("111222 my" + Utils.mySha1());
+
         InetAddress inetAddress = findSuccessor(hash);
         AddEntryCommand addEntryCommand = new AddEntryCommand(inetAddress, hash, NetworkManager.getMyInetAddres());
         Future<Boolean> future = CommandQueue.getInstance().execute(addEntryCommand);
