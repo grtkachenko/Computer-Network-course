@@ -34,10 +34,11 @@ public class StabilizeThread extends CancelableThread {
                 CommandQueue.getInstance().execute(new NotifyCommand(NetworkManager.getSuccessor()));
                 InetAddress succ = CommandQueue.getInstance().execute(new FindSuccessorCommand(NetworkManager.getSuccessor(), Utils.sha1(NetworkManager.getSuccessor()))).get();
                 NetworkManager.setSuccessor2(succ);
+
             } catch (InterruptedException e) {
-                e.printStackTrace();
             } catch (ExecutionException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                UDPReceiverThread.successorFailed();
             }
             try {
                 Thread.sleep(delta);

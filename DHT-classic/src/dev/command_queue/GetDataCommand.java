@@ -32,21 +32,11 @@ public class GetDataCommand extends Command<String> {
         out.writeByte(CommandQueue.GET_DATA);
         out.writeInt(key);
         if (in.read() == 0) {
-            List<Byte> bytes = new ArrayList<Byte>();
-            for (int i = 0; i < 1000; i++) {
-                byte cur = in.readByte();
-                if (cur == 0) {
-                    break;
-                }
-                bytes.add(cur);
-            }
-            byte[] arrBytes = new byte[bytes.size()];
-            for (int i = 0; i < arrBytes.length; i++) {
-                arrBytes[i] = bytes.get(i);
-            }
+            int len = in.readInt();
+            byte[] arrBytes = new byte[len];
+            in.readFully(arrBytes);
             String result = new String(arrBytes);
             Log.log(getTag(), "ok result ; string = " + result);
-
             return result;
         } else {
             Log.log(getTag(), "error");

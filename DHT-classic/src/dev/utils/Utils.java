@@ -1,10 +1,12 @@
 package dev.utils;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Enumeration;
 
 public class Utils {
@@ -74,7 +76,7 @@ public class Utils {
     }
 
     public static int intFromByteArray(byte[] arr) {
-        return ByteBuffer.wrap(sha1(arr)).getInt();
+        return ByteBuffer.wrap(arr).getInt();
     }
 
     public static boolean inetAddressInside(InetAddress address, InetAddress left, InetAddress right) {
@@ -118,7 +120,22 @@ public class Utils {
     }
 
     public static int sha1(InetAddress addr) {
-        return intFromByteArray(addr.getAddress());
+        return intFromByteArray(sha1(addr.getAddress()));
+    }
+
+    public static String getStringInRange(int l, int r) {
+        SecureRandom random = new SecureRandom();
+        int countIter = 1000;
+        for (int iter = 0; iter < countIter; iter++) {
+            int cnt = 20;
+            if (iter > countIter / 2)
+                cnt = 70;
+            String s = new BigInteger(cnt, random).toString(32);
+            int m = Utils.intFromByteArray(sha1(s));
+            if (inetAddressInsideInEx(l, m, r))
+                return s;
+        }
+        return null;
     }
 
     public static int mySha1() {

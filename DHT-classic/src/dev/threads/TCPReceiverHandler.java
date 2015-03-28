@@ -96,18 +96,43 @@ public class TCPReceiverHandler implements Runnable {
 
                 case CommandQueue.GET_IP:
                     Log.log(tag, "received GET_IP");
-                    outToClient.writeByte(0);
                     key = inFromClient.readInt();
+                    if (!NetworkManager.getHashTable().containsKey(key)) {
+                        outToClient.write(0xff);
+                        break;
+                    }
+                    outToClient.writeByte(0);
                     outToClient.write(NetworkManager.getHashTable().get(key).getAddress());
                     break;
 
                 case CommandQueue.GET_DATA:
                     Log.log(tag, "received GET_DATA");
                     key = inFromClient.readInt();
-                    outToClient.write(NetworkManager.getMyData().get(key).getBytes());
-                    outToClient.write(0);
+                    byte[] res = NetworkManager.getMyData().get(key).getBytes();
+                    outToClient.writeByte(0);
+                    outToClient.writeInt(res.length);
+                    outToClient.write(res);
                     break;
 
+                case CommandQueue.PRED_FAILED:
+                    Log.log(tag, "received PRED_FAILED");
+                    ip = new byte[4];
+                    for (int i = 0; i < 4; i++) {
+                        ip[i] = inFromClient.readByte();
+                    }
+                    NetworkManager.setPredecessor(InetAddress.getByAddress(ip));
+                    break;
+
+                case CommandQueue.ADD_TO_BACKUP:
+                    Log.log(tag, "received ADD_TO_BACKUP");
+                    key = inFromClient.readInt();
+                    ip = new byte[4];
+                    for (int i = 0; i < 4; i++) {
+                        ip[i] = inFromClient.readByte();
+                    }
+                    NetworkManager.getBackUp().put(key, InetAddress.getByAddress(ip));
+                    outToClient.writeByte(0);
+                    break;
             }
             Log.log("NETWORK", String.format("pred = %s, me = %s, succ = %s, succ2 = %s", NetworkManager.getPredecessor(), NetworkManager.getMyInetAddres(),
                     NetworkManager.getSuccessor(), NetworkManager.getSuccessor2()));
@@ -157,7 +182,7 @@ public class TCPReceiverHandler implements Runnable {
 //                        e.printStackTrace();
 //                    }
 //                }
-//                NetworkManager.getHashTable().remove(key);
+                NetworkManager.getHashTable().remove(key);
             }
         }
     }
@@ -178,9 +203,7 @@ public class TCPReceiverHandler implements Runnable {
                         return result;
                     }
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
                 } catch (ExecutionException e) {
-                    e.printStackTrace();
                 }
             }
         }
@@ -230,7 +253,7 @@ public class TCPReceiverHandler implements Runnable {
         }
     }
 
-    public static String getEntry(int key) {
+    public static String getEntry(String key) {
         int hash = Utils.intFromByteArray(sha1(key));
         InetAddress inetAddress = findSuccessor(hash);
         GetIpCommand getIpCommand = new GetIpCommand(inetAddress, hash);

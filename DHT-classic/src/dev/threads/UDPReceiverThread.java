@@ -2,6 +2,7 @@ package dev.threads;
 
 import dev.command_queue.CommandQueue;
 import dev.command_queue.PickUpCommand;
+import dev.command_queue.PredFailedCommand;
 import dev.utils.Log;
 import dev.utils.NetworkManager;
 import dev.utils.Utils;
@@ -13,9 +14,28 @@ import java.net.InetAddress;
 
 public class UDPReceiverThread extends CancelableThread {
     protected DatagramSocket socket;
+    private static volatile long lastKeepAlive = -1;
 
     public UDPReceiverThread(DatagramSocket socket) {
         this.socket = socket;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if (lastKeepAlive != -1) {
+                    long now = System.currentTimeMillis();
+                    if (now - lastKeepAlive > 8000) {
+                        successorFailed();
+                    }
+                }
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
     }
 
     public void run() {
@@ -42,7 +62,9 @@ public class UDPReceiverThread extends CancelableThread {
                         }
                         break;
                     case CommandQueue.KEEP_ALIVE:
-                        // TODO: write it
+                        Log.log(getTag(), "receiveg KEEP_ALIVE");
+
+                        lastKeepAlive = System.currentTimeMillis();
                         break;
                 }
             } catch (IOException e) {
@@ -50,5 +72,13 @@ public class UDPReceiverThread extends CancelableThread {
             }
         }
         socket.close();
+    }
+
+    public static void successorFailed() {
+        Log.log("sending PRED_FAILED");
+        CommandQueue.getInstance().execute(new PredFailedCommand());
+        NetworkManager.getFinger()[0] = NetworkManager.getSuccessor2();
+        NetworkManager.setSuccessor2(TCPReceiverHandler.runFindSuccessor(NetworkManager.getFinger()[0], Utils.sha1(NetworkManager.getFinger()[0])));
+        lastKeepAlive = -1;
     }
 }
