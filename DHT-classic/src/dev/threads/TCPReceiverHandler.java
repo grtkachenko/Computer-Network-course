@@ -123,7 +123,7 @@ public class TCPReceiverHandler implements Runnable {
             InetAddress oldPred = NetworkManager.getPredecessor();
             NetworkManager.setPredecessor(byAddress);
             shareTable(oldPred);
-//            cleanTable(oldPred);
+            cleanTable(oldPred);
         }
     }
 
@@ -133,9 +133,9 @@ public class TCPReceiverHandler implements Runnable {
         }
 
         for (Integer key : NetworkManager.getHashTable().keySet()) {
-//            if (Utils.inetAddressInsideInEx(key, sha1(oldPred), sha1(NetworkManager.getPredecessor()))) {
-            CommandQueue.getInstance().execute(new AddEntryCommand(NetworkManager.getPredecessor(), key, NetworkManager.getHashTable().get(key)));
-//            }
+            if (Utils.inetAddressInsideInEx(key, sha1(oldPred), sha1(NetworkManager.getPredecessor()))) {
+                CommandQueue.getInstance().execute(new AddEntryCommand(NetworkManager.getPredecessor(), key, NetworkManager.getHashTable().get(key)));
+            }
         }
     }
 

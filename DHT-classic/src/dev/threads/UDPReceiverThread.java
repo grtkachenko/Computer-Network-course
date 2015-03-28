@@ -13,14 +13,12 @@ import java.net.InetAddress;
 
 public class UDPReceiverThread extends CancelableThread {
     protected DatagramSocket socket;
-    private boolean running = true;
 
     public UDPReceiverThread(DatagramSocket socket) {
         this.socket = socket;
     }
 
     public void run() {
-
         while (running) {
             try {
                 byte[] buf = new byte[256];

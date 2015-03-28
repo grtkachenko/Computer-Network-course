@@ -6,10 +6,9 @@ import dev.utils.NetworkManager;
 
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.util.Scanner;
 
 public class Main {
-    public static final int TCP_PORT = 8889;
+    public static final int TCP_PORT = 8888;
 
     public static void main(String[] args) throws Exception {
         try {
